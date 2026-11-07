@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { Campo } from "@/components/campo";
 import { MensagensErro } from "@/components/mensagens-erro";
@@ -30,9 +30,8 @@ interface LinhaItem {
   preco: string;
 }
 
-let proximaChave = 0;
-const novaLinha = (): LinhaItem => ({
-  chave: proximaChave++,
+const novaLinha = (chave: number): LinhaItem => ({
+  chave,
   produto: null,
   quantidade: "",
   preco: "",
@@ -43,7 +42,9 @@ export function PedidoFormulario() {
   const { registro: depositos = [] } = useRegistro<Deposito[]>("depositos");
   const [fornecedor, setFornecedor] = useState<Fornecedor | null>(null);
   const [depositoEscolhido, setDepositoEscolhido] = useState("");
-  const [linhas, setLinhas] = useState<LinhaItem[]>(() => [novaLinha()]);
+  // O contador fica no componente (e não no módulo) para que servidor e navegador gerem as mesmas chaves.
+  const proximaChave = useRef(1);
+  const [linhas, setLinhas] = useState<LinhaItem[]>(() => [novaLinha(0)]);
   const [erros, setErros] = useState<string[]>([]);
   const [enviando, setEnviando] = useState(false);
 
@@ -180,7 +181,7 @@ export function PedidoFormulario() {
           type="button"
           variant="outline"
           className="justify-self-start"
-          onClick={() => setLinhas((atuais) => [...atuais, novaLinha()])}
+          onClick={() => setLinhas((atuais) => [...atuais, novaLinha(proximaChave.current++)])}
         >
           Adicionar item
         </Button>
