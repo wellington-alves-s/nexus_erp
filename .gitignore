@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+.vscode/
+.idea/
+
+*.tsbuildinfo
+
+# Documentacao
+docs/
+*.md
