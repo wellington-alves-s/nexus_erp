@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { MensagensErro } from "@/components/mensagens-erro";
 import { Paginacao } from "@/components/paginacao";
 import { buttonVariants } from "@/components/ui/button";
@@ -38,15 +39,14 @@ export function Listagem<T>({
   const listagem = useListagem<T>(recurso);
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">{titulo}</h1>
+    <section className="flex flex-col gap-5">
+      <CabecalhoPagina titulo={titulo}>
         {hrefNovo && (
           <Link href={hrefNovo} className={buttonVariants()}>
             Novo
           </Link>
         )}
-      </div>
+      </CabecalhoPagina>
 
       {placeholderBusca && (
         <Input
@@ -73,7 +73,9 @@ export function Listagem<T>({
           {listagem.itens.map((item) => (
             <TableRow key={chave(item)}>
               {renderLinha(item).map((celula, indice) => (
-                <TableCell key={cabecalhos[indice]}>{celula}</TableCell>
+                <TableCell key={cabecalhos[indice]} className="whitespace-normal">
+                  {celula}
+                </TableCell>
               ))}
             </TableRow>
           ))}

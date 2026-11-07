@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
+import { Informacao } from "@/components/informacao";
 import { MensagensErro } from "@/components/mensagens-erro";
-import { Badge } from "@/components/ui/badge";
+import { Secao } from "@/components/secao";
+import { EtiquetaStatus } from "@/components/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Table,
@@ -15,16 +18,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api, mensagensDoErro } from "@/lib/api";
-import {
-  formatarCnpj,
-  formatarData,
-  formatarMoeda,
-  formatarQuantidade,
-} from "@/lib/formatadores";
+import { formatarCnpj, formatarData, formatarMoeda, formatarQuantidade } from "@/lib/formatadores";
+import { cn } from "@/lib/utils";
 import { useRegistro } from "@/lib/use-registro";
 import {
   ROTULO_STATUS_CONFERENCIA,
   ROTULO_STATUS_PEDIDO,
+  TOM_STATUS_CONFERENCIA,
+  TOM_STATUS_PEDIDO,
   type PedidoCompra,
 } from "./tipos";
 
@@ -55,75 +56,69 @@ export function PedidoDetalhe() {
   }
 
   return (
-    <section className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Pedido {pedido.numero}</h1>
-        <Link href="/pedidos-compra" className={buttonVariants({ variant: "outline" })}>
+    <section className="flex flex-col gap-5">
+      <CabecalhoPagina titulo={`Pedido ${pedido.numero}`}>
+        <Link href="/pedidos-compra" className={cn(buttonVariants({ variant: "outline" }))}>
           Voltar
         </Link>
-      </div>
+      </CabecalhoPagina>
 
-      <dl className="grid gap-4 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-muted-foreground">Fornecedor</dt>
-          <dd>
-            {pedido.fornecedor.razaoSocial} ({formatarCnpj(pedido.fornecedor.cnpj)})
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Depósito</dt>
-          <dd>{pedido.deposito.nome}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Data</dt>
-          <dd>{formatarData(pedido.createdAt)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Situação</dt>
-          <dd>
-            <Badge variant="secondary">{ROTULO_STATUS_PEDIDO[pedido.status]}</Badge>
-          </dd>
-        </div>
-      </dl>
+      <Secao titulo="Dados do pedido" className="sm:grid-cols-4">
+        <Informacao rotulo="Fornecedor">
+          {pedido.fornecedor.razaoSocial}
+          <span className="block text-muted-foreground">
+            {formatarCnpj(pedido.fornecedor.cnpj)}
+          </span>
+        </Informacao>
+        <Informacao rotulo="Depósito">{pedido.deposito.nome}</Informacao>
+        <Informacao rotulo="Data">{formatarData(pedido.createdAt)}</Informacao>
+        <Informacao rotulo="Situação">
+          <EtiquetaStatus tom={TOM_STATUS_PEDIDO[pedido.status]}>
+            {ROTULO_STATUS_PEDIDO[pedido.status]}
+          </EtiquetaStatus>
+        </Informacao>
+      </Secao>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Código</TableHead>
-            <TableHead>Produto</TableHead>
-            <TableHead className="text-right">Quantidade</TableHead>
-            <TableHead className="text-right">Recebido</TableHead>
-            <TableHead className="text-right">Pendente</TableHead>
-            <TableHead className="text-right">Preço unitário</TableHead>
-            <TableHead className="text-right">Subtotal</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {pedido.itens.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>{item.produto.codigo}</TableCell>
-              <TableCell>{item.produto.nome}</TableCell>
-              <TableCell className="text-right">
-                {formatarQuantidade(item.quantidade)} {item.produto.unidade}
-              </TableCell>
-              <TableCell className="text-right">{formatarQuantidade(item.recebida)}</TableCell>
-              <TableCell className="text-right">{formatarQuantidade(item.pendente)}</TableCell>
-              <TableCell className="text-right">{formatarMoeda(item.precoUnitario)}</TableCell>
-              <TableCell className="text-right">{formatarMoeda(item.subtotal)}</TableCell>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold">Itens</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Código</TableHead>
+              <TableHead>Produto</TableHead>
+              <TableHead className="text-right">Quantidade</TableHead>
+              <TableHead className="text-right">Recebido</TableHead>
+              <TableHead className="text-right">Pendente</TableHead>
+              <TableHead className="text-right">Preço unitário</TableHead>
+              <TableHead className="text-right">Subtotal</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <p className="text-right text-lg font-semibold">Total: {formatarMoeda(pedido.total)}</p>
+          </TableHeader>
+          <TableBody>
+            {pedido.itens.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>{item.produto.codigo}</TableCell>
+                <TableCell className="whitespace-normal">{item.produto.nome}</TableCell>
+                <TableCell className="text-right">
+                  {formatarQuantidade(item.quantidade)} {item.produto.unidade}
+                </TableCell>
+                <TableCell className="text-right">{formatarQuantidade(item.recebida)}</TableCell>
+                <TableCell className="text-right">{formatarQuantidade(item.pendente)}</TableCell>
+                <TableCell className="text-right">{formatarMoeda(item.precoUnitario)}</TableCell>
+                <TableCell className="text-right">{formatarMoeda(item.subtotal)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <p className="text-right text-base font-semibold">Total: {formatarMoeda(pedido.total)}</p>
+      </div>
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold">Conferências de recebimento</h2>
+          <h2 className="text-sm font-semibold">Conferências de recebimento</h2>
           {conferenciaEmAberto ? (
             <Link
               href={`/conferencias/${conferenciaEmAberto.id}`}
-              className={buttonVariants({ variant: "outline" })}
+              className={cn(buttonVariants({ variant: "outline" }))}
             >
               Continuar conferência {conferenciaEmAberto.numero}
             </Link>
@@ -156,11 +151,17 @@ export function PedidoDetalhe() {
                 <TableRow key={conferencia.id}>
                   <TableCell>{conferencia.numero}</TableCell>
                   <TableCell>{formatarData(conferencia.createdAt)}</TableCell>
-                  <TableCell>{ROTULO_STATUS_CONFERENCIA[conferencia.status]}</TableCell>
                   <TableCell>
-                    {conferencia.entrada ? `Entrada ${conferencia.entrada.numero}` : "Não efetivada"}
+                    <EtiquetaStatus tom={TOM_STATUS_CONFERENCIA[conferencia.status]}>
+                      {ROTULO_STATUS_CONFERENCIA[conferencia.status]}
+                    </EtiquetaStatus>
                   </TableCell>
                   <TableCell>
+                    {conferencia.entrada
+                      ? `Entrada ${conferencia.entrada.numero}`
+                      : "Não efetivada"}
+                  </TableCell>
+                  <TableCell className="text-right">
                     <Link
                       href={`/conferencias/${conferencia.id}`}
                       className="text-primary underline-offset-4 hover:underline"

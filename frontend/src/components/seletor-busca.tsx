@@ -30,12 +30,12 @@ function Resultados<T extends { id: string }>({
         value={listagem.busca}
         onChange={(evento) => listagem.setBusca(evento.target.value)}
       />
-      <ul className="max-h-48 overflow-auto rounded-lg border">
+      <ul className="max-h-48 divide-y overflow-auto rounded-lg border bg-card">
         {listagem.itens.map((item) => (
           <li key={item.id}>
             <button
               type="button"
-              className="w-full px-2.5 py-1.5 text-left text-sm hover:bg-muted"
+              className="w-full px-3 py-2 text-left text-sm hover:bg-accent"
               onClick={() => onChange(item)}
             >
               {rotuloDe(item)}
@@ -43,9 +43,9 @@ function Resultados<T extends { id: string }>({
           </li>
         ))}
         {!listagem.carregando && !listagem.erro && listagem.itens.length === 0 && (
-          <li className="px-2.5 py-1.5 text-sm text-muted-foreground">Nenhum resultado.</li>
+          <li className="px-3 py-2 text-sm text-muted-foreground">Nenhum resultado.</li>
         )}
-        {listagem.erro && <li className="px-2.5 py-1.5 text-sm text-destructive">{listagem.erro}</li>}
+        {listagem.erro && <li className="px-3 py-2 text-sm text-destructive">{listagem.erro}</li>}
       </ul>
     </div>
   );

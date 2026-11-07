@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { Listagem } from "@/components/listagem";
-import { Badge } from "@/components/ui/badge";
+import { EtiquetaStatus } from "@/components/status-badge";
 import { formatarData, formatarMoeda } from "@/lib/formatadores";
-import { ROTULO_STATUS_PEDIDO, type PedidoCompra } from "./tipos";
+import { ROTULO_STATUS_PEDIDO, TOM_STATUS_PEDIDO, type PedidoCompra } from "./tipos";
 
 export function PedidosLista() {
   return (
@@ -20,9 +20,9 @@ export function PedidosLista() {
         pedido.fornecedor.razaoSocial,
         pedido.deposito.nome,
         formatarMoeda(pedido.total),
-        <Badge key="situacao" variant="secondary">
+        <EtiquetaStatus key="situacao" tom={TOM_STATUS_PEDIDO[pedido.status]}>
           {ROTULO_STATUS_PEDIDO[pedido.status]}
-        </Badge>,
+        </EtiquetaStatus>,
         <Link
           key="ver"
           href={`/pedidos-compra/${pedido.id}`}

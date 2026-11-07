@@ -13,21 +13,23 @@ const LINKS = [
 export function Navegacao() {
   const caminho = usePathname();
   return (
-    <header className="border-b">
-      <nav className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
-        <Link href="/" className="font-semibold tracking-tight">
+    <header className="border-b bg-card">
+      <nav className="mx-auto flex h-14 max-w-6xl items-stretch gap-8 px-6">
+        <Link href="/" className="flex items-center text-sm font-semibold tracking-wide">
           NEXUS ERP
         </Link>
-        {LINKS.map(({ href, rotulo }) => (
-          <Link
-            key={href}
-            href={href}
-            aria-current={caminho.startsWith(href) ? "page" : undefined}
-            className="text-sm text-muted-foreground hover:text-foreground aria-[current=page]:font-medium aria-[current=page]:text-foreground"
-          >
-            {rotulo}
-          </Link>
-        ))}
+        <div className="flex items-stretch gap-6">
+          {LINKS.map(({ href, rotulo }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={caminho.startsWith(href) ? "page" : undefined}
+              className="flex items-center border-b-2 border-transparent text-sm text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:border-primary aria-[current=page]:font-medium aria-[current=page]:text-foreground"
+            >
+              {rotulo}
+            </Link>
+          ))}
+        </div>
       </nav>
     </header>
   );

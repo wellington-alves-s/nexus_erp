@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
+import { Informacao } from "@/components/informacao";
 import { MensagensErro } from "@/components/mensagens-erro";
-import { Badge } from "@/components/ui/badge";
+import { Secao } from "@/components/secao";
+import { EtiquetaStatus } from "@/components/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,9 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ROTULO_STATUS_CONFERENCIA } from "@/features/pedidos-compra/tipos";
+import { ROTULO_STATUS_CONFERENCIA, TOM_STATUS_CONFERENCIA } from "@/features/pedidos-compra/tipos";
 import { api, mensagensDoErro } from "@/lib/api";
 import { formatarData, formatarQuantidade } from "@/lib/formatadores";
+import { cn } from "@/lib/utils";
 import { useRegistro } from "@/lib/use-registro";
 import type { Conferencia } from "./tipos";
 
@@ -82,7 +86,9 @@ function ConferenciaPainel({ inicial }: { inicial: Conferencia }) {
   const aoEncerrar = () =>
     executar(async () => {
       await salvar();
-      setConferencia(await api<Conferencia>(`/conferencias/${conferencia.id}/encerrar`, { method: "POST" }));
+      setConferencia(
+        await api<Conferencia>(`/conferencias/${conferencia.id}/encerrar`, { method: "POST" }),
+      );
     });
 
   const aoEfetivar = () =>
@@ -95,44 +101,36 @@ function ConferenciaPainel({ inicial }: { inicial: Conferencia }) {
     });
 
   return (
-    <section className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Conferência {conferencia.numero} do pedido {conferencia.pedido.numero}
-        </h1>
+    <section className="flex flex-col gap-5">
+      <CabecalhoPagina
+        titulo={`Conferência ${conferencia.numero} do pedido ${conferencia.pedido.numero}`}
+      >
         <Link
           href={`/pedidos-compra/${conferencia.pedido.id}`}
-          className={buttonVariants({ variant: "outline" })}
+          className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao pedido
         </Link>
-      </div>
+      </CabecalhoPagina>
 
-      <dl className="grid gap-4 text-sm sm:grid-cols-3">
-        <div>
-          <dt className="text-muted-foreground">Situação</dt>
-          <dd>
-            <Badge variant="secondary">{ROTULO_STATUS_CONFERENCIA[conferencia.status]}</Badge>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Abertura</dt>
-          <dd>{formatarData(conferencia.createdAt)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Entrada</dt>
-          <dd>
-            {conferencia.entrada
-              ? `Entrada ${conferencia.entrada.numero} efetivada em ${formatarData(conferencia.entrada.createdAt)}`
-              : "Não efetivada"}
-          </dd>
-        </div>
-      </dl>
+      <Secao titulo="Dados da conferência" className="sm:grid-cols-3">
+        <Informacao rotulo="Situação">
+          <EtiquetaStatus tom={TOM_STATUS_CONFERENCIA[conferencia.status]}>
+            {ROTULO_STATUS_CONFERENCIA[conferencia.status]}
+          </EtiquetaStatus>
+        </Informacao>
+        <Informacao rotulo="Abertura">{formatarData(conferencia.createdAt)}</Informacao>
+        <Informacao rotulo="Entrada">
+          {conferencia.entrada
+            ? `Entrada ${conferencia.entrada.numero} efetivada em ${formatarData(conferencia.entrada.createdAt)}`
+            : "Não efetivada"}
+        </Informacao>
+      </Secao>
 
       {editavel && (
         <p className="text-sm text-muted-foreground">
-          Informe a quantidade que chegou de cada item. A conferência não altera o estoque; somente a
-          entrada efetivada altera. Quantidade acima do pendente exige justificativa.
+          Informe a quantidade que chegou de cada item. A conferência não altera o estoque; somente
+          a entrada efetivada altera. Quantidade acima do pendente exige justificativa.
         </p>
       )}
 
@@ -154,7 +152,7 @@ function ConferenciaPainel({ inicial }: { inicial: Conferencia }) {
             const excedente = digitado > Number(item.pendente);
             return (
               <TableRow key={item.id}>
-                <TableCell>
+                <TableCell className="whitespace-normal">
                   {item.produto.codigo} - {item.produto.nome}
                 </TableCell>
                 <TableCell className="text-right">
@@ -180,20 +178,21 @@ function ConferenciaPainel({ inicial }: { inicial: Conferencia }) {
                   )}
                 </TableCell>
                 <TableCell>
-                  {editavel ? (
-                    excedente && (
-                      <Input
-                        aria-label={`Justificativa do excedente de ${item.produto.nome}`}
-                        maxLength={500}
-                        value={justificativas[item.id] ?? ""}
-                        onChange={(evento) =>
-                          setJustificativas((atuais) => ({ ...atuais, [item.id]: evento.target.value }))
-                        }
-                      />
-                    )
-                  ) : (
-                    (conferido?.justificativaExcesso ?? "")
-                  )}
+                  {editavel
+                    ? excedente && (
+                        <Input
+                          aria-label={`Justificativa do excedente de ${item.produto.nome}`}
+                          maxLength={500}
+                          value={justificativas[item.id] ?? ""}
+                          onChange={(evento) =>
+                            setJustificativas((atuais) => ({
+                              ...atuais,
+                              [item.id]: evento.target.value,
+                            }))
+                          }
+                        />
+                      )
+                    : (conferido?.justificativaExcesso ?? "")}
                 </TableCell>
               </TableRow>
             );

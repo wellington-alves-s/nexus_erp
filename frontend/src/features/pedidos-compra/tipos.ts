@@ -14,9 +14,20 @@ export const ROTULO_STATUS_PEDIDO: Record<StatusPedido, string> = {
   RECEBIDO: "Recebido",
 };
 
+export const TOM_STATUS_PEDIDO: Record<StatusPedido, "info" | "warning" | "success"> = {
+  ABERTO: "info",
+  PARCIALMENTE_RECEBIDO: "warning",
+  RECEBIDO: "success",
+};
+
 export const ROTULO_STATUS_CONFERENCIA: Record<StatusConferencia, string> = {
   EM_CONFERENCIA: "Em conferência",
   ENCERRADA: "Encerrada",
+};
+
+export const TOM_STATUS_CONFERENCIA: Record<StatusConferencia, "warning" | "neutral"> = {
+  EM_CONFERENCIA: "warning",
+  ENCERRADA: "neutral",
 };
 
 export interface ItemPedidoCompra {

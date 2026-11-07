@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { Campo } from "@/components/campo";
 import { MensagensErro } from "@/components/mensagens-erro";
+import { Secao } from "@/components/secao";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -50,38 +52,46 @@ export function ProdutoFormulario({ produto }: { produto?: Produto }) {
   }
 
   return (
-    <form onSubmit={enviar} className="flex max-w-xl flex-col gap-4">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {produto ? `Produto ${produto.codigo}` : "Novo produto"}
-      </h1>
+    <form onSubmit={enviar} className="flex max-w-3xl flex-col gap-5">
+      <CabecalhoPagina titulo={produto ? `Produto ${produto.codigo}` : "Novo produto"} />
 
-      <Campo id="nome" rotulo="Nome" value={nome} onChange={setNome} maxLength={200} required />
+      <Secao titulo="Dados do produto">
+        <Campo
+          id="nome"
+          rotulo="Nome"
+          value={nome}
+          onChange={setNome}
+          maxLength={200}
+          required
+          className="sm:col-span-2"
+        />
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="unidade">Unidade de medida</Label>
-        <Select
-          value={unidade}
-          onValueChange={(valor) => setUnidade((valor ?? "") as UnidadeMedida | "")}
-        >
-          <SelectTrigger id="unidade" className="w-40">
-            <SelectValue placeholder="Selecione" />
-          </SelectTrigger>
-          <SelectContent>
-            {UNIDADES.map((opcao) => (
-              <SelectItem key={opcao} value={opcao}>
-                {opcao}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {produto && (
-        <div className="flex items-center gap-2">
-          <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
-          <Label htmlFor="ativo">Ativo</Label>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="unidade">Unidade de medida</Label>
+          <Select
+            value={unidade}
+            onValueChange={(valor) => setUnidade((valor ?? "") as UnidadeMedida | "")}
+          >
+            <SelectTrigger id="unidade" className="w-full">
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              {UNIDADES.map((opcao) => (
+                <SelectItem key={opcao} value={opcao}>
+                  {opcao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )}
+
+        {produto && (
+          <div className="flex items-center gap-2">
+            <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
+            <Label htmlFor="ativo">Ativo</Label>
+          </div>
+        )}
+      </Secao>
 
       <MensagensErro mensagens={erros} />
 

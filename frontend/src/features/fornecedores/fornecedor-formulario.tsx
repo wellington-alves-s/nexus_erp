@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { Campo } from "@/components/campo";
 import { MensagensErro } from "@/components/mensagens-erro";
+import { Secao } from "@/components/secao";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -68,28 +70,70 @@ export function FornecedorFormulario({ fornecedor }: { fornecedor?: Fornecedor }
   }
 
   return (
-    <form onSubmit={enviar} className="flex max-w-3xl flex-col gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {fornecedor ? "Editar fornecedor" : "Novo fornecedor"}
-      </h1>
+    <form onSubmit={enviar} className="flex max-w-3xl flex-col gap-5">
+      <CabecalhoPagina titulo={fornecedor ? "Editar fornecedor" : "Novo fornecedor"} />
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="mb-2 font-medium">Dados gerais</legend>
-        <Campo id="razaoSocial" rotulo="Razão social" value={dados.razaoSocial} onChange={alterar("razaoSocial")} maxLength={200} required />
-        <Campo id="nomeFantasia" rotulo="Nome fantasia" value={dados.nomeFantasia} onChange={alterar("nomeFantasia")} maxLength={200} />
-        <Campo id="cnpj" rotulo="CNPJ" value={dados.cnpj} onChange={alterar("cnpj", formatarCnpj)} inputMode="text" required />
-        <Campo id="email" rotulo="E-mail" type="email" value={dados.email} onChange={alterar("email")} maxLength={254} />
-        <Campo id="telefone" rotulo="Telefone" type="tel" value={dados.telefone} onChange={alterar("telefone", formatarTelefone)} />
-      </fieldset>
+      <Secao titulo="Dados gerais">
+        <Campo
+          id="razaoSocial"
+          rotulo="Razão social"
+          value={dados.razaoSocial}
+          onChange={alterar("razaoSocial")}
+          maxLength={200}
+          required
+        />
+        <Campo
+          id="nomeFantasia"
+          rotulo="Nome fantasia"
+          value={dados.nomeFantasia}
+          onChange={alterar("nomeFantasia")}
+          maxLength={200}
+        />
+        <Campo
+          id="cnpj"
+          rotulo="CNPJ"
+          value={dados.cnpj}
+          onChange={alterar("cnpj", formatarCnpj)}
+          inputMode="text"
+          required
+        />
+        <Campo
+          id="email"
+          rotulo="E-mail"
+          type="email"
+          value={dados.email}
+          onChange={alterar("email")}
+          maxLength={254}
+        />
+        <Campo
+          id="telefone"
+          rotulo="Telefone"
+          type="tel"
+          value={dados.telefone}
+          onChange={alterar("telefone", formatarTelefone)}
+        />
+      </Secao>
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="mb-2 font-medium">Endereço</legend>
-        <Campo id="logradouro" rotulo="Logradouro" value={dados.logradouro} onChange={alterar("logradouro")} maxLength={200} className="sm:col-span-2" />
-        <Campo id="cidade" rotulo="Cidade" value={dados.cidade} onChange={alterar("cidade")} maxLength={100} />
+      <Secao titulo="Endereço">
+        <Campo
+          id="logradouro"
+          rotulo="Logradouro"
+          value={dados.logradouro}
+          onChange={alterar("logradouro")}
+          maxLength={200}
+          className="sm:col-span-2"
+        />
+        <Campo
+          id="cidade"
+          rotulo="Cidade"
+          value={dados.cidade}
+          onChange={alterar("cidade")}
+          maxLength={100}
+        />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="uf">UF</Label>
           <Select value={dados.uf} onValueChange={(valor) => alterar("uf")(valor ?? "")}>
-            <SelectTrigger id="uf" className="w-24">
+            <SelectTrigger id="uf" className="w-full">
               <SelectValue placeholder="UF" />
             </SelectTrigger>
             <SelectContent>
@@ -101,21 +145,48 @@ export function FornecedorFormulario({ fornecedor }: { fornecedor?: Fornecedor }
             </SelectContent>
           </Select>
         </div>
-        <Campo id="cep" rotulo="CEP" value={dados.cep} onChange={alterar("cep", formatarCep)} inputMode="numeric" />
-      </fieldset>
+        <Campo
+          id="cep"
+          rotulo="CEP"
+          value={dados.cep}
+          onChange={alterar("cep", formatarCep)}
+          inputMode="numeric"
+        />
+      </Secao>
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="mb-2 font-medium">Contato responsável</legend>
-        <Campo id="contatoNome" rotulo="Nome" value={dados.contatoNome} onChange={alterar("contatoNome")} maxLength={200} className="sm:col-span-2" />
-        <Campo id="contatoEmail" rotulo="E-mail" type="email" value={dados.contatoEmail} onChange={alterar("contatoEmail")} maxLength={254} />
-        <Campo id="contatoTelefone" rotulo="Telefone" type="tel" value={dados.contatoTelefone} onChange={alterar("contatoTelefone", formatarTelefone)} />
-      </fieldset>
+      <Secao titulo="Contato responsável">
+        <Campo
+          id="contatoNome"
+          rotulo="Nome"
+          value={dados.contatoNome}
+          onChange={alterar("contatoNome")}
+          maxLength={200}
+          className="sm:col-span-2"
+        />
+        <Campo
+          id="contatoEmail"
+          rotulo="E-mail"
+          type="email"
+          value={dados.contatoEmail}
+          onChange={alterar("contatoEmail")}
+          maxLength={254}
+        />
+        <Campo
+          id="contatoTelefone"
+          rotulo="Telefone"
+          type="tel"
+          value={dados.contatoTelefone}
+          onChange={alterar("contatoTelefone", formatarTelefone)}
+        />
+      </Secao>
 
       {fornecedor && (
-        <div className="flex items-center gap-2">
-          <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
-          <Label htmlFor="ativo">Ativo</Label>
-        </div>
+        <Secao titulo="Situação">
+          <div className="flex items-center gap-2">
+            <Switch id="ativo" checked={ativo} onCheckedChange={setAtivo} />
+            <Label htmlFor="ativo">Ativo</Label>
+          </div>
+        </Secao>
       )}
 
       <MensagensErro mensagens={erros} />
