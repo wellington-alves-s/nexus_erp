@@ -8,7 +8,7 @@ import type { Produto } from "./tipos";
 
 export function ProdutoEdicao() {
   const { id } = useParams<{ id: string }>();
-  const { registro, erros, carregando } = useRegistro<Produto>("produtos", id);
+  const { registro, erros, carregando } = useRegistro<Produto>(`produtos/${id}`);
 
   if (carregando) return <p className="text-sm text-muted-foreground">Carregando...</p>;
   if (!registro) return <MensagensErro mensagens={erros} />;

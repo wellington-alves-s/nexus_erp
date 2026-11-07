@@ -20,7 +20,7 @@ interface ListagemProps<T> {
   recurso: string;
   titulo: string;
   hrefNovo: string;
-  placeholderBusca: string;
+  placeholderBusca?: string;
   cabecalhos: string[];
   chave: (item: T) => string;
   renderLinha: (item: T) => ReactNode[];
@@ -46,14 +46,16 @@ export function Listagem<T>({
         </Link>
       </div>
 
-      <Input
-        type="search"
-        aria-label="Buscar"
-        placeholder={placeholderBusca}
-        value={listagem.busca}
-        onChange={(evento) => listagem.setBusca(evento.target.value)}
-        className="max-w-sm"
-      />
+      {placeholderBusca && (
+        <Input
+          type="search"
+          aria-label="Buscar"
+          placeholder={placeholderBusca}
+          value={listagem.busca}
+          onChange={(evento) => listagem.setBusca(evento.target.value)}
+          className="max-w-sm"
+        />
+      )}
 
       {listagem.erro && <MensagensErro mensagens={[listagem.erro]} />}
 

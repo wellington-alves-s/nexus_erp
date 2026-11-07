@@ -33,3 +33,18 @@ export function formatarTelefone(valor: string): string {
     digitos.length > 10 ? "(##) #####-####" : "(##) ####-####",
   );
 }
+
+const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const quantidade = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 3 });
+
+export function formatarMoeda(valor: string): string {
+  return moeda.format(Number(valor));
+}
+
+export function formatarQuantidade(valor: string): string {
+  return quantidade.format(Number(valor));
+}
+
+export function formatarData(iso: string): string {
+  return new Date(iso).toLocaleDateString("pt-BR");
+}

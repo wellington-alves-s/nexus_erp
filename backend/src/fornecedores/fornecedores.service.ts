@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { normalizarCnpj } from '../common/cnpj.js';
 import { EMPRESA_PADRAO_ID } from '../common/empresa-padrao.js';
-import { Pagina, PaginacaoQueryDto, paraSkipTake } from '../common/paginacao.js';
+import { BuscaQueryDto, Pagina, paraSkipTake } from '../common/paginacao.js';
 import { Fornecedor, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AtualizarFornecedorDto, CriarFornecedorDto } from './fornecedores.dto.js';
@@ -16,8 +16,8 @@ function violaUnicidade(erro: unknown): boolean {
 export class FornecedoresService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listar(query: PaginacaoQueryDto): Promise<Pagina<Fornecedor>> {
-    const where: Prisma.FornecedorWhereInput = { empresaId: EMPRESA_PADRAO_ID };
+  async listar(query: BuscaQueryDto): Promise<Pagina<Fornecedor>> {
+    const where: Prisma.FornecedorWhereInput = { empresaId: EMPRESA_PADRAO_ID, ativo: query.ativo };
     if (query.busca) {
       where.OR = [{ razaoSocial: { contains: query.busca, mode: 'insensitive' } }];
       const cnpj = normalizarCnpj(query.busca);

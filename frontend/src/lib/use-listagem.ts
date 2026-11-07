@@ -8,7 +8,8 @@ const ATRASO_BUSCA_MS = 300;
 
 type Resultado<T> = { chave: string; pagina?: Pagina<T>; erro?: string };
 
-export function useListagem<T>(recurso: string) {
+/** `filtros` são parâmetros fixos da consulta, no formato de query string (ex.: "ativo=true"). */
+export function useListagem<T>(recurso: string, filtros = "") {
   const [busca, setBusca] = useState("");
   const [buscaAplicada, setBuscaAplicada] = useState("");
   const [page, setPage] = useState(1);
@@ -26,10 +27,9 @@ export function useListagem<T>(recurso: string) {
 
   useEffect(() => {
     const controle = new AbortController();
-    const parametros = new URLSearchParams({
-      page: String(page),
-      pageSize: String(TAMANHO_PAGINA),
-    });
+    const parametros = new URLSearchParams(filtros);
+    parametros.set("page", String(page));
+    parametros.set("pageSize", String(TAMANHO_PAGINA));
     if (buscaAplicada) parametros.set("busca", buscaAplicada);
 
     api<Pagina<T>>(`/${recurso}?${parametros}`, { signal: controle.signal })
@@ -39,7 +39,7 @@ export function useListagem<T>(recurso: string) {
         setResultado({ chave, erro: mensagensDoErro(erro).join(" ") });
       });
     return () => controle.abort();
-  }, [recurso, page, buscaAplicada, chave]);
+  }, [recurso, filtros, page, buscaAplicada, chave]);
 
   const atual = resultado?.chave === chave ? resultado : undefined;
   const total = resultado?.pagina?.total ?? 0;

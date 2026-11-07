@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EMPRESA_PADRAO_ID } from '../common/empresa-padrao.js';
-import { Pagina, PaginacaoQueryDto, paraSkipTake } from '../common/paginacao.js';
+import { BuscaQueryDto, Pagina, paraSkipTake } from '../common/paginacao.js';
 import { Prisma, Produto } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AtualizarProdutoDto, CriarProdutoDto } from './produtos.dto.js';
@@ -12,8 +12,8 @@ const BUSCA_CODIGO = /^\d{1,9}$/;
 export class ProdutosService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listar(query: PaginacaoQueryDto): Promise<Pagina<Produto>> {
-    const where: Prisma.ProdutoWhereInput = { empresaId: EMPRESA_PADRAO_ID };
+  async listar(query: BuscaQueryDto): Promise<Pagina<Produto>> {
+    const where: Prisma.ProdutoWhereInput = { empresaId: EMPRESA_PADRAO_ID, ativo: query.ativo };
     if (query.busca) {
       where.OR = [{ nome: { contains: query.busca, mode: 'insensitive' } }];
       if (BUSCA_CODIGO.test(query.busca)) {

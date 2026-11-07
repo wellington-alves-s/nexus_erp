@@ -16,25 +16,28 @@ enum UnidadeMedida {
 }
 
 model Empresa {
-  id           String       @id @default(uuid()) @db.Uuid
+  id           String         @id @default(uuid()) @db.Uuid
   nome         String
-  createdAt    DateTime     @default(now())
+  createdAt    DateTime       @default(now())
   produtos     Produto[]
   fornecedores Fornecedor[]
+  depositos    Deposito[]
+  pedidos      PedidoCompra[]
 
   @@map("empresas")
 }
 
 model Produto {
-  id        String        @id @default(uuid()) @db.Uuid
-  empresaId String        @db.Uuid
-  codigo    Int           @default(autoincrement())
+  id        String             @id @default(uuid()) @db.Uuid
+  empresaId String             @db.Uuid
+  codigo    Int                @default(autoincrement())
   nome      String
   unidade   UnidadeMedida
-  ativo     Boolean       @default(true)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  empresa   Empresa       @relation(fields: [empresaId], references: [id])
+  ativo     Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  empresa   Empresa            @relation(fields: [empresaId], references: [id])
+  itens     ItemPedidoCompra[]
 
   @@unique([empresaId, codigo])
   @@index([empresaId, nome])
@@ -42,26 +45,76 @@ model Produto {
 }
 
 model Fornecedor {
-  id              String   @id @default(uuid()) @db.Uuid
-  empresaId       String   @db.Uuid
+  id              String         @id @default(uuid()) @db.Uuid
+  empresaId       String         @db.Uuid
   razaoSocial     String
   nomeFantasia    String?
-  cnpj            String   @db.Char(14)
+  cnpj            String         @db.Char(14)
   email           String?
   telefone        String?
   logradouro      String?
   cidade          String?
-  uf              String?  @db.Char(2)
-  cep             String?  @db.Char(8)
+  uf              String?        @db.Char(2)
+  cep             String?        @db.Char(8)
   contatoNome     String?
   contatoEmail    String?
   contatoTelefone String?
-  ativo           Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  empresa         Empresa  @relation(fields: [empresaId], references: [id])
+  ativo           Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  empresa         Empresa        @relation(fields: [empresaId], references: [id])
+  pedidos         PedidoCompra[]
 
   @@unique([empresaId, cnpj])
   @@index([empresaId, razaoSocial])
   @@map("fornecedores")
+}
+
+enum StatusPedidoCompra {
+  ABERTO
+}
+
+model Deposito {
+  id        String         @id @default(uuid()) @db.Uuid
+  empresaId String         @db.Uuid
+  nome      String
+  ativo     Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  empresa   Empresa        @relation(fields: [empresaId], references: [id])
+  pedidos   PedidoCompra[]
+
+  @@index([empresaId])
+  @@map("depositos")
+}
+
+model PedidoCompra {
+  id           String             @id @default(uuid()) @db.Uuid
+  empresaId    String             @db.Uuid
+  numero       Int                @default(autoincrement())
+  fornecedorId String             @db.Uuid
+  depositoId   String             @db.Uuid
+  status       StatusPedidoCompra @default(ABERTO)
+  createdAt    DateTime           @default(now())
+  empresa      Empresa            @relation(fields: [empresaId], references: [id])
+  fornecedor   Fornecedor         @relation(fields: [fornecedorId], references: [id])
+  deposito     Deposito           @relation(fields: [depositoId], references: [id])
+  itens        ItemPedidoCompra[]
+
+  @@unique([empresaId, numero])
+  @@index([fornecedorId])
+  @@map("pedidos_compra")
+}
+
+model ItemPedidoCompra {
+  id            String       @id @default(uuid()) @db.Uuid
+  pedidoId      String       @db.Uuid
+  produtoId     String       @db.Uuid
+  quantidade    Decimal      @db.Decimal(12, 3)
+  precoUnitario Decimal      @db.Decimal(12, 2)
+  pedido        PedidoCompra @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto       Produto      @relation(fields: [produtoId], references: [id])
+
+  @@unique([pedidoId, produtoId])
+  @@index([produtoId])
+  @@map("itens_pedido_compra")
 }

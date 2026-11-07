@@ -8,7 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { Pagina, PaginacaoQueryDto } from '../common/paginacao.js';
+import { BuscaQueryDto, Pagina } from '../common/paginacao.js';
 import { Fornecedor } from '../generated/prisma/client.js';
 import { AtualizarFornecedorDto, CriarFornecedorDto } from './fornecedores.dto.js';
 import { FornecedoresService } from './fornecedores.service.js';
@@ -18,7 +18,7 @@ export class FornecedoresController {
   constructor(private readonly fornecedores: FornecedoresService) {}
 
   @Get()
-  listar(@Query() query: PaginacaoQueryDto): Promise<Pagina<Fornecedor>> {
+  listar(@Query() query: BuscaQueryDto): Promise<Pagina<Fornecedor>> {
     return this.fornecedores.listar(query);
   }
 

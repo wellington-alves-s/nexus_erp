@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { Aparar } from './transformers.js';
 
 export const TAMANHO_PAGINA_PADRAO = 20;
@@ -18,12 +18,22 @@ export class PaginacaoQueryDto {
   @Min(1)
   @Max(TAMANHO_PAGINA_MAXIMO)
   pageSize: number = TAMANHO_PAGINA_PADRAO;
+}
 
+/** Listagem de cadastros: paginação, busca textual e filtro por situação. */
+export class BuscaQueryDto extends PaginacaoQueryDto {
   @IsOptional()
   @Aparar()
   @IsString()
   @MaxLength(100)
   busca?: string;
+
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  @IsBoolean()
+  ativo?: boolean;
 }
 
 export interface Pagina<T> {
