@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
+import { Navegacao } from "@/components/navegacao";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NEXUS ERP",
+  title: { default: "NEXUS ERP", template: "%s | NEXUS ERP" },
   description: "Gestão de compras, recebimento e estoque",
 };
 
@@ -23,7 +25,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Suspense fallback={<div className="h-[49px] border-b" />}>
+          <Navegacao />
+        </Suspense>
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-8">
+          {children}
+        </main>
+      </body>
     </html>
   );
 }

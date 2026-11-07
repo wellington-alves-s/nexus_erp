@@ -6,3 +6,62 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UnidadeMedida {
+  UN
+  CX
+  BR
+  PCT
+  M2
+}
+
+model Empresa {
+  id           String       @id @default(uuid()) @db.Uuid
+  nome         String
+  createdAt    DateTime     @default(now())
+  produtos     Produto[]
+  fornecedores Fornecedor[]
+
+  @@map("empresas")
+}
+
+model Produto {
+  id        String        @id @default(uuid()) @db.Uuid
+  empresaId String        @db.Uuid
+  codigo    Int           @default(autoincrement())
+  nome      String
+  unidade   UnidadeMedida
+  ativo     Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  empresa   Empresa       @relation(fields: [empresaId], references: [id])
+
+  @@unique([empresaId, codigo])
+  @@index([empresaId, nome])
+  @@map("produtos")
+}
+
+model Fornecedor {
+  id              String   @id @default(uuid()) @db.Uuid
+  empresaId       String   @db.Uuid
+  razaoSocial     String
+  nomeFantasia    String?
+  cnpj            String   @db.Char(14)
+  email           String?
+  telefone        String?
+  logradouro      String?
+  cidade          String?
+  uf              String?  @db.Char(2)
+  cep             String?  @db.Char(8)
+  contatoNome     String?
+  contatoEmail    String?
+  contatoTelefone String?
+  ativo           Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  empresa         Empresa  @relation(fields: [empresaId], references: [id])
+
+  @@unique([empresaId, cnpj])
+  @@index([empresaId, razaoSocial])
+  @@map("fornecedores")
+}
