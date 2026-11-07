@@ -15,3 +15,4 @@ coverage/
 # Documentacao
 docs/
 *.md
+!/README.md
