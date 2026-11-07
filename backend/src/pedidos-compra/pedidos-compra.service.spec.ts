@@ -94,13 +94,17 @@ describe('paraResposta', () => {
     const decimal = (valor: string) => new Prisma.Decimal(valor);
     const resposta = paraResposta({
       itens: [
-        { quantidade: decimal('0.333'), precoUnitario: decimal('10.00') },
-        { quantidade: decimal('2.000'), precoUnitario: decimal('1.25') },
+        { quantidade: decimal('0.333'), precoUnitario: decimal('10.00'), itensEntrada: [{ quantidade: decimal('0.100') }] },
+        { quantidade: decimal('2.000'), precoUnitario: decimal('1.25'), itensEntrada: [] },
       ],
     } as Parameters<typeof paraResposta>[0]);
     expect(resposta.itens.map((item) => item.subtotal)).toEqual(['3.33', '2.50']);
     expect(resposta.total).toBe('5.83');
     expect(resposta.itens[0].quantidade).toBe('0.333');
+    expect(resposta.itens.map((item) => [item.recebida, item.pendente])).toEqual([
+      ['0.100', '0.233'],
+      ['0.000', '2.000'],
+    ]);
   });
 });
 

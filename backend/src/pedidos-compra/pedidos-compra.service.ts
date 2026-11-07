@@ -3,14 +3,28 @@ import { EMPRESA_PADRAO_ID } from '../common/empresa-padrao.js';
 import { Pagina, PaginacaoQueryDto, paraSkipTake } from '../common/paginacao.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { calcularPendente, somar } from '../recebimento/quantidades.js';
 import { CriarPedidoCompraDto } from './pedidos-compra.dto.js';
 
 const INCLUIR = {
   fornecedor: { select: { id: true, razaoSocial: true, cnpj: true } },
   deposito: { select: { id: true, nome: true } },
   itens: {
-    include: { produto: { select: { id: true, codigo: true, nome: true, unidade: true } } },
+    include: {
+      produto: { select: { id: true, codigo: true, nome: true, unidade: true } },
+      itensEntrada: { select: { quantidade: true } },
+    },
     orderBy: { produto: { codigo: 'asc' } },
+  },
+  conferencias: {
+    select: {
+      id: true,
+      numero: true,
+      status: true,
+      createdAt: true,
+      entrada: { select: { id: true, numero: true } },
+    },
+    orderBy: { numero: 'asc' },
   },
 } satisfies Prisma.PedidoCompraInclude;
 
@@ -25,12 +39,17 @@ export function paraResposta(pedido: PedidoCompleto) {
   const total = subtotais.reduce((soma, subtotal) => soma.plus(subtotal), new Prisma.Decimal(0));
   return {
     ...pedido,
-    itens: pedido.itens.map((item, indice) => ({
-      ...item,
-      quantidade: item.quantidade.toFixed(3),
-      precoUnitario: item.precoUnitario.toFixed(2),
-      subtotal: subtotais[indice].toFixed(2),
-    })),
+    itens: pedido.itens.map(({ itensEntrada, ...item }, indice) => {
+      const recebida = somar(itensEntrada.map((entrada) => entrada.quantidade));
+      return {
+        ...item,
+        quantidade: item.quantidade.toFixed(3),
+        precoUnitario: item.precoUnitario.toFixed(2),
+        subtotal: subtotais[indice].toFixed(2),
+        recebida: recebida.toFixed(3),
+        pendente: calcularPendente(item.quantidade, recebida).toFixed(3),
+      };
+    }),
     total: total.toFixed(2),
   };
 }

@@ -16,28 +16,35 @@ enum UnidadeMedida {
 }
 
 model Empresa {
-  id           String         @id @default(uuid()) @db.Uuid
-  nome         String
-  createdAt    DateTime       @default(now())
-  produtos     Produto[]
-  fornecedores Fornecedor[]
-  depositos    Deposito[]
-  pedidos      PedidoCompra[]
+  id            String                   @id @default(uuid()) @db.Uuid
+  nome          String
+  createdAt     DateTime                 @default(now())
+  produtos      Produto[]
+  fornecedores  Fornecedor[]
+  depositos     Deposito[]
+  pedidos       PedidoCompra[]
+  conferencias  ConferenciaRecebimento[]
+  entradas      EntradaMercadoria[]
+  saldos        SaldoEstoque[]
+  movimentacoes MovimentacaoEstoque[]
 
   @@map("empresas")
 }
 
 model Produto {
-  id        String             @id @default(uuid()) @db.Uuid
-  empresaId String             @db.Uuid
-  codigo    Int                @default(autoincrement())
-  nome      String
-  unidade   UnidadeMedida
-  ativo     Boolean            @default(true)
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  empresa   Empresa            @relation(fields: [empresaId], references: [id])
-  itens     ItemPedidoCompra[]
+  id            String                @id @default(uuid()) @db.Uuid
+  empresaId     String                @db.Uuid
+  codigo        Int                   @default(autoincrement())
+  nome          String
+  unidade       UnidadeMedida
+  ativo         Boolean               @default(true)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  empresa       Empresa               @relation(fields: [empresaId], references: [id])
+  itens         ItemPedidoCompra[]
+  itensEntrada  ItemEntrada[]
+  saldos        SaldoEstoque[]
+  movimentacoes MovimentacaoEstoque[]
 
   @@unique([empresaId, codigo])
   @@index([empresaId, nome])
@@ -72,33 +79,39 @@ model Fornecedor {
 
 enum StatusPedidoCompra {
   ABERTO
+  PARCIALMENTE_RECEBIDO
+  RECEBIDO
 }
 
 model Deposito {
-  id        String         @id @default(uuid()) @db.Uuid
-  empresaId String         @db.Uuid
-  nome      String
-  ativo     Boolean        @default(true)
-  createdAt DateTime       @default(now())
-  empresa   Empresa        @relation(fields: [empresaId], references: [id])
-  pedidos   PedidoCompra[]
+  id            String                @id @default(uuid()) @db.Uuid
+  empresaId     String                @db.Uuid
+  nome          String
+  ativo         Boolean               @default(true)
+  createdAt     DateTime              @default(now())
+  empresa       Empresa               @relation(fields: [empresaId], references: [id])
+  pedidos       PedidoCompra[]
+  saldos        SaldoEstoque[]
+  movimentacoes MovimentacaoEstoque[]
 
   @@index([empresaId])
   @@map("depositos")
 }
 
 model PedidoCompra {
-  id           String             @id @default(uuid()) @db.Uuid
-  empresaId    String             @db.Uuid
-  numero       Int                @default(autoincrement())
-  fornecedorId String             @db.Uuid
-  depositoId   String             @db.Uuid
-  status       StatusPedidoCompra @default(ABERTO)
-  createdAt    DateTime           @default(now())
-  empresa      Empresa            @relation(fields: [empresaId], references: [id])
-  fornecedor   Fornecedor         @relation(fields: [fornecedorId], references: [id])
-  deposito     Deposito           @relation(fields: [depositoId], references: [id])
+  id           String                   @id @default(uuid()) @db.Uuid
+  empresaId    String                   @db.Uuid
+  numero       Int                      @default(autoincrement())
+  fornecedorId String                   @db.Uuid
+  depositoId   String                   @db.Uuid
+  status       StatusPedidoCompra       @default(ABERTO)
+  createdAt    DateTime                 @default(now())
+  empresa      Empresa                  @relation(fields: [empresaId], references: [id])
+  fornecedor   Fornecedor               @relation(fields: [fornecedorId], references: [id])
+  deposito     Deposito                 @relation(fields: [depositoId], references: [id])
   itens        ItemPedidoCompra[]
+  conferencias ConferenciaRecebimento[]
+  entradas     EntradaMercadoria[]
 
   @@unique([empresaId, numero])
   @@index([fornecedorId])
@@ -106,15 +119,128 @@ model PedidoCompra {
 }
 
 model ItemPedidoCompra {
-  id            String       @id @default(uuid()) @db.Uuid
-  pedidoId      String       @db.Uuid
-  produtoId     String       @db.Uuid
-  quantidade    Decimal      @db.Decimal(12, 3)
-  precoUnitario Decimal      @db.Decimal(12, 2)
-  pedido        PedidoCompra @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  produto       Produto      @relation(fields: [produtoId], references: [id])
+  id               String            @id @default(uuid()) @db.Uuid
+  pedidoId         String            @db.Uuid
+  produtoId        String            @db.Uuid
+  quantidade       Decimal           @db.Decimal(12, 3)
+  precoUnitario    Decimal           @db.Decimal(12, 2)
+  pedido           PedidoCompra      @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto          Produto           @relation(fields: [produtoId], references: [id])
+  itensConferencia ItemConferencia[]
+  itensEntrada     ItemEntrada[]
 
   @@unique([pedidoId, produtoId])
   @@index([produtoId])
   @@map("itens_pedido_compra")
+}
+
+enum StatusConferencia {
+  EM_CONFERENCIA
+  ENCERRADA
+}
+
+enum TipoMovimentacaoEstoque {
+  ENTRADA_MERCADORIA
+}
+
+model ConferenciaRecebimento {
+  id          String             @id @default(uuid()) @db.Uuid
+  empresaId   String             @db.Uuid
+  numero      Int                @default(autoincrement())
+  pedidoId    String             @db.Uuid
+  status      StatusConferencia  @default(EM_CONFERENCIA)
+  createdAt   DateTime           @default(now())
+  encerradaEm DateTime?
+  empresa     Empresa            @relation(fields: [empresaId], references: [id])
+  pedido      PedidoCompra       @relation(fields: [pedidoId], references: [id])
+  itens       ItemConferencia[]
+  entrada     EntradaMercadoria?
+
+  @@unique([empresaId, numero])
+  @@index([pedidoId])
+  @@map("conferencias_recebimento")
+}
+
+model ItemConferencia {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  conferenciaId        String                 @db.Uuid
+  itemPedidoId         String                 @db.Uuid
+  quantidadeConferida  Decimal                @db.Decimal(12, 3)
+  justificativaExcesso String?
+  conferencia          ConferenciaRecebimento @relation(fields: [conferenciaId], references: [id], onDelete: Cascade)
+  itemPedido           ItemPedidoCompra       @relation(fields: [itemPedidoId], references: [id])
+
+  @@unique([conferenciaId, itemPedidoId])
+  @@map("itens_conferencia")
+}
+
+model EntradaMercadoria {
+  id            String                 @id @default(uuid()) @db.Uuid
+  empresaId     String                 @db.Uuid
+  numero        Int                    @default(autoincrement())
+  pedidoId      String                 @db.Uuid
+  conferenciaId String                 @unique @db.Uuid
+  createdAt     DateTime               @default(now())
+  empresa       Empresa                @relation(fields: [empresaId], references: [id])
+  pedido        PedidoCompra           @relation(fields: [pedidoId], references: [id])
+  conferencia   ConferenciaRecebimento @relation(fields: [conferenciaId], references: [id])
+  itens         ItemEntrada[]
+  movimentacoes MovimentacaoEstoque[]
+
+  @@unique([empresaId, numero])
+  @@index([pedidoId])
+  @@map("entradas_mercadoria")
+}
+
+model ItemEntrada {
+  id           String               @id @default(uuid()) @db.Uuid
+  entradaId    String               @db.Uuid
+  itemPedidoId String               @db.Uuid
+  produtoId    String               @db.Uuid
+  quantidade   Decimal              @db.Decimal(12, 3)
+  entrada      EntradaMercadoria    @relation(fields: [entradaId], references: [id], onDelete: Cascade)
+  itemPedido   ItemPedidoCompra     @relation(fields: [itemPedidoId], references: [id])
+  produto      Produto              @relation(fields: [produtoId], references: [id])
+  movimentacao MovimentacaoEstoque?
+
+  @@unique([entradaId, itemPedidoId])
+  @@index([itemPedidoId])
+  @@map("itens_entrada")
+}
+
+model SaldoEstoque {
+  id         String   @id @default(uuid()) @db.Uuid
+  empresaId  String   @db.Uuid
+  produtoId  String   @db.Uuid
+  depositoId String   @db.Uuid
+  quantidade Decimal  @db.Decimal(12, 3)
+  updatedAt  DateTime @updatedAt
+  empresa    Empresa  @relation(fields: [empresaId], references: [id])
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  deposito   Deposito @relation(fields: [depositoId], references: [id])
+
+  @@unique([produtoId, depositoId])
+  @@index([empresaId])
+  @@map("saldos_estoque")
+}
+
+model MovimentacaoEstoque {
+  id            String                  @id @default(uuid()) @db.Uuid
+  empresaId     String                  @db.Uuid
+  produtoId     String                  @db.Uuid
+  depositoId    String                  @db.Uuid
+  tipo          TipoMovimentacaoEstoque
+  quantidade    Decimal                 @db.Decimal(12, 3)
+  entradaId     String                  @db.Uuid
+  itemEntradaId String                  @unique @db.Uuid
+  createdAt     DateTime                @default(now())
+  empresa       Empresa                 @relation(fields: [empresaId], references: [id])
+  produto       Produto                 @relation(fields: [produtoId], references: [id])
+  deposito      Deposito                @relation(fields: [depositoId], references: [id])
+  entrada       EntradaMercadoria       @relation(fields: [entradaId], references: [id])
+  itemEntrada   ItemEntrada             @relation(fields: [itemEntradaId], references: [id])
+
+  @@index([produtoId, depositoId])
+  @@index([entradaId])
+  @@map("movimentacoes_estoque")
 }

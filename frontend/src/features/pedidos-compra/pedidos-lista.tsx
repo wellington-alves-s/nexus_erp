@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Listagem } from "@/components/listagem";
 import { Badge } from "@/components/ui/badge";
 import { formatarData, formatarMoeda } from "@/lib/formatadores";
-import type { PedidoCompra } from "./tipos";
+import { ROTULO_STATUS_PEDIDO, type PedidoCompra } from "./tipos";
 
 export function PedidosLista() {
   return (
@@ -21,7 +21,7 @@ export function PedidosLista() {
         pedido.deposito.nome,
         formatarMoeda(pedido.total),
         <Badge key="situacao" variant="secondary">
-          {pedido.status === "ABERTO" ? "Aberto" : pedido.status}
+          {ROTULO_STATUS_PEDIDO[pedido.status]}
         </Badge>,
         <Link
           key="ver"

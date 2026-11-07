@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/produtos", rotulo: "Produtos" },
   { href: "/fornecedores", rotulo: "Fornecedores" },
   { href: "/pedidos-compra", rotulo: "Pedidos de compra" },
+  { href: "/estoque", rotulo: "Estoque" },
 ];
 
 export function Navegacao() {

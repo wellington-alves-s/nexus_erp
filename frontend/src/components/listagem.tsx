@@ -19,7 +19,7 @@ import { useListagem } from "@/lib/use-listagem";
 interface ListagemProps<T> {
   recurso: string;
   titulo: string;
-  hrefNovo: string;
+  hrefNovo?: string;
   placeholderBusca?: string;
   cabecalhos: string[];
   chave: (item: T) => string;
@@ -41,9 +41,11 @@ export function Listagem<T>({
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">{titulo}</h1>
-        <Link href={hrefNovo} className={buttonVariants()}>
-          Novo
-        </Link>
+        {hrefNovo && (
+          <Link href={hrefNovo} className={buttonVariants()}>
+            Novo
+          </Link>
+        )}
       </div>
 
       {placeholderBusca && (

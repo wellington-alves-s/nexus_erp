@@ -20,14 +20,17 @@ export class PaginacaoQueryDto {
   pageSize: number = TAMANHO_PAGINA_PADRAO;
 }
 
-/** Listagem de cadastros: paginação, busca textual e filtro por situação. */
-export class BuscaQueryDto extends PaginacaoQueryDto {
+/** Listagem paginada com busca textual. */
+export class PesquisaQueryDto extends PaginacaoQueryDto {
   @IsOptional()
   @Aparar()
   @IsString()
   @MaxLength(100)
   busca?: string;
+}
 
+/** Listagem de cadastros: busca textual e filtro por situação. */
+export class BuscaQueryDto extends PesquisaQueryDto {
   @IsOptional()
   @Transform(({ value }: { value: unknown }) =>
     value === 'true' ? true : value === 'false' ? false : value,
